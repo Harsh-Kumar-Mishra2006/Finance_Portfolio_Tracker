@@ -18,9 +18,20 @@ app.use(cors({
   origin: process.env.CLIENT_URL || '*',
   credentials: true
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+app.get('/', (req, res) => {
+  res.json({
+    message: '🚀 Finance Portfolio Tracker API is running!',
+    endpoints: {
+      health: '/health',
+      api: '/api',
+    }
+  });
+});
 
 // Health check for Render
 app.get('/health', (req, res) => {
