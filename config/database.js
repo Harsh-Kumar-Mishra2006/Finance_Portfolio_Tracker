@@ -5,14 +5,14 @@ require('dotenv').config();
 let sequelize;
 
 if (process.env.DATABASE_URL) {
-  // Production - Render PostgreSQL
+  
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
     protocol: 'postgres',
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false // Critical for Render
+        rejectUnauthorized: false 
       }
     },
     logging: false,

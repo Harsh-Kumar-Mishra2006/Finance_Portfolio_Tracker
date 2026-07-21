@@ -7,7 +7,7 @@ async function seed() {
     try {
         console.log('🌱 Seeding database...');
         
-        // Create test user
+        // Creating test user
         const password_hash = await bcrypt.hash('password123', 10);
         const user = await User.create({
             name: 'Test User',
@@ -17,7 +17,7 @@ async function seed() {
         
         console.log(`✅ Created test user: ${user.email}`);
         
-        // Create sample investments
+        // Creating sample investments
         const investments = [
             {
                 user_id: user.id,

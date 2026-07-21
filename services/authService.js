@@ -4,21 +4,21 @@ const jwt = require('jsonwebtoken');
 const { ValidationError } = require('../utils/errorHandler');
 
 const authService = {
-    // Register user
+    // Registering user
     async register(userData) {
         const { name, email, password } = userData;
         
-        // Check if user exists
+        // Checking if user exists
         const existingUser = await User.findByEmail(email);
         if (existingUser) {
             throw new ValidationError('User already exists with this email');
         }
         
-        // Create user
+        // Creating user
         const user = await User.createUser({ name, email, password });
         const userJSON = User.toJSON(user);
         
-        // Generate token
+        // Generating token
         const token = this.generateToken(userJSON);
         
         return { user: userJSON, token };
@@ -26,13 +26,13 @@ const authService = {
     
     // Login user
     async login(email, password) {
-        // Find user
+        // Finding user
         const user = await User.findByEmail(email);
         if (!user) {
             throw new ValidationError('Invalid email or password');
         }
         
-        // Check password
+        // password checking
         const isPasswordValid = await user.comparePassword(password);
         if (!isPasswordValid) {
             throw new ValidationError('Invalid email or password');
@@ -44,7 +44,7 @@ const authService = {
         return { user: userJSON, token };
     },
     
-    // Generate JWT
+    // Generating JWT
     generateToken(user) {
         return jwt.sign(
             { 
@@ -57,7 +57,7 @@ const authService = {
         );
     },
     
-    // Verify token
+    // Verifing token
     verifyToken(token) {
         try {
             return jwt.verify(token, process.env.JWT_SECRET);

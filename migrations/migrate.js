@@ -6,7 +6,6 @@ async function migrate() {
     try {
         console.log('🔄 Running migrations...');
         
-        // Sync all models
         await sequelize.sync({ force: true });
         
         console.log('✅ All tables created successfully!');

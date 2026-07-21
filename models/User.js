@@ -3,7 +3,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 const bcrypt = require('bcryptjs');
 
-// Define User model
+// User model
 const User = sequelize.define('User', {
     id: {
         type: DataTypes.UUID,
@@ -50,7 +50,7 @@ const User = sequelize.define('User', {
     updatedAt: 'updated_at'
 });
 
-// Instance methods (added to prototype)
+// Instance methods
 User.prototype.comparePassword = async function(password) {
     return bcrypt.compare(password, this.password_hash);
 };

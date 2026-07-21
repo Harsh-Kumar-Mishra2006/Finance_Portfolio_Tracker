@@ -10,7 +10,6 @@ let userId;
 beforeAll(async () => {
     await sequelize.sync({ force: true });
     
-    // Register and login user
     await request(app)
         .post('/api/auth/register')
         .send({

@@ -2,7 +2,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
-// Define Investment model
+// Investment model
 const Investment = sequelize.define('Investment', {
     id: {
         type: DataTypes.UUID,
@@ -170,7 +170,6 @@ Investment.toJSON = function(investment) {
     };
 };
 
-// Define associations
 Investment.associate = function(models) {
     Investment.belongsTo(models.User, {
         foreignKey: 'user_id',

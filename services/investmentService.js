@@ -3,7 +3,7 @@ const { Investment } = require('../models');
 const { ValidationError, NotFoundError } = require('../utils/errorHandler');
 
 const investmentService = {
-    // Get all investments with pagination
+    // Get- Fetch all investments with pagination
     async getAllInvestments(userId, options = {}) {
         const { limit = 10, offset = 0, sortBy = 'created_at', order = 'DESC' } = options;
         
@@ -22,7 +22,7 @@ const investmentService = {
         };
     },
     
-    // Get investment by ID
+    // Get- Fetch investment by ID
     async getInvestmentById(userId, investmentId) {
         const investment = await Investment.findByUserAndId(userId, investmentId);
         if (!investment) {
@@ -31,7 +31,7 @@ const investmentService = {
         return Investment.toJSON(investment);
     },
     
-    // Create investment
+    // investment creation
     async createInvestment(userId, investmentData) {
         const { investment_name, investment_type, invested_amount, current_value, purchase_date } = investmentData;
         
@@ -51,7 +51,7 @@ const investmentService = {
         return Investment.toJSON(investment);
     },
     
-    // Update investment
+    // Updating investment
     async updateInvestment(userId, investmentId, updateData) {
         const investment = await Investment.updateInvestment(userId, investmentId, updateData);
         if (!investment) {
@@ -60,7 +60,7 @@ const investmentService = {
         return Investment.toJSON(investment);
     },
     
-    // Delete investment
+    // Deleting investment
     async deleteInvestment(userId, investmentId) {
         const investment = await Investment.deleteInvestment(userId, investmentId);
         if (!investment) {
@@ -69,7 +69,7 @@ const investmentService = {
         return { id: investmentId, deleted: true };
     },
     
-    // Get portfolio summary
+    // Get- Fetch portfolio summary
     async getPortfolioSummary(userId) {
         return await Investment.getPortfolioSummary(userId);
     }

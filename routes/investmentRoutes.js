@@ -5,7 +5,6 @@ const investmentController = require('../controllers/investmentController');
 const { validate, schemas } = require('../middleware/validation');
 const auth = require('../middleware/auth');
 
-// All routes require authentication
 router.use(auth);
 
 router.get('/', investmentController.getAll);
