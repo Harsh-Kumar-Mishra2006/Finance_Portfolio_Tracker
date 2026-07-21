@@ -7,8 +7,13 @@
   "type": "commonjs",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "migrate": "node src/migrations/migrate.js",
+    "seed": "node src/migrations/seed.js",
+    "build": "echo 'No build step required'"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.7",
