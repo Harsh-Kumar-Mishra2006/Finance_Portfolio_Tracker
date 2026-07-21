@@ -1,4 +1,4 @@
-// server.js
+// src/app.js
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -14,10 +14,22 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || '*', // Your frontend URL
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// Health check for Render
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
 
 // Routes
 app.use('/api', routes);
@@ -43,8 +55,13 @@ const startServer = async () => {
             process.exit(1);
         }
         
-        // Sync database (development only)
-        if (process.env.NODE_ENV === 'development') {
+        // Sync database in production (use alter: true for safety)
+        if (process.env.NODE_ENV === 'production') {
+            // In production, we use migrations instead of sync
+            // But for simplicity, we'll use alter: true
+            await sequelize.sync({ alter: true });
+            console.log('✅ Database synced');
+        } else {
             await sequelize.sync({ alter: true });
             console.log('✅ Database synced');
         }
@@ -53,8 +70,8 @@ const startServer = async () => {
         app.listen(PORT, () => {
             console.log(`\n🚀 Server running on port ${PORT}`);
             console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-            console.log(`📊 API URL: http://localhost:${PORT}/api`);
-            console.log(`❤️  Health Check: http://localhost:${PORT}/api/health\n`);
+            console.log(`📊 API URL: ${process.env.API_URL || `http://localhost:${PORT}`}/api`);
+            console.log(`❤️  Health Check: ${process.env.API_URL || `http://localhost:${PORT}`}/health\n`);
         });
     } catch (error) {
         console.error('❌ Failed to start server:', error.message);
