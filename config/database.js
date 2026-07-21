@@ -1,21 +1,18 @@
-// src/config/database.js
+// config/database.js
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Check if we're in production and have a DATABASE_URL (Render provides this)
-const isProduction = process.env.NODE_ENV === 'production';
-
 let sequelize;
 
-if (isProduction && process.env.DATABASE_URL) {
-  // Use DATABASE_URL from Render (PostgreSQL)
+if (process.env.DATABASE_URL) {
+  // Production - Render PostgreSQL
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
     protocol: 'postgres',
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false // Required for Render's PostgreSQL
+        rejectUnauthorized: false // Critical for Render
       }
     },
     logging: false,
@@ -35,14 +32,14 @@ if (isProduction && process.env.DATABASE_URL) {
 } else {
   // Local development
   sequelize = new Sequelize(
-    process.env.DB_DATABASE,
-    process.env.DB_USER,
+    process.env.DB_DATABASE || 'finance_tracker',
+    process.env.DB_USER || 'postgres',
     process.env.DB_PASSWORD,
     {
-      host: process.env.DB_HOST,
+      host: process.env.DB_HOST || 'localhost',
       port: process.env.DB_PORT || 5432,
       dialect: 'postgres',
-      logging: process.env.NODE_ENV === 'development' ? console.log : false,
+      logging: console.log,
       pool: {
         max: 10,
         min: 0,
@@ -59,19 +56,22 @@ if (isProduction && process.env.DATABASE_URL) {
   );
 }
 
-// Test connection
 const testConnection = async () => {
-    try {
-        await sequelize.authenticate();
-        console.log('✅ Database connection established successfully.');
-        return true;
-    } catch (error) {
-        console.error('❌ Unable to connect to database:', error.message);
-        return false;
-    }
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Database connection established successfully.');
+    return true;
+  } catch (error) {
+    console.error('❌ Unable to connect to database:', error.message);
+    console.error('📝 Connection details:', {
+      hasUrl: !!process.env.DATABASE_URL,
+      env: process.env.NODE_ENV || 'development'
+    });
+    return false;
+  }
 };
 
 module.exports = {
-    sequelize,
-    testConnection
+  sequelize,
+  testConnection
 };
