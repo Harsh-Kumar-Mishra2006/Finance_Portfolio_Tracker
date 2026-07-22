@@ -17,15 +17,15 @@ describe('Auth Endpoints', () => {
         const response = await request(app)
             .post('/api/auth/register')
             .send({
-                name: 'John Doe',
-                email: 'john@example.com',
+                name: 'Harsh Kumar',
+                email: 'harsh@example.com',
                 password: 'password123'
             });
         
         expect(response.status).toBe(201);
         expect(response.body.success).toBe(true);
         expect(response.body.data.user).toHaveProperty('id');
-        expect(response.body.data.user.email).toBe('john@example.com');
+        expect(response.body.data.user.email).toBe('harsh@example.com');
         expect(response.body.data).toHaveProperty('token');
     });
     
@@ -33,16 +33,16 @@ describe('Auth Endpoints', () => {
         await request(app)
             .post('/api/auth/register')
             .send({
-                name: 'Jane Doe',
-                email: 'duplicate@example.com',
+                name: 'Harsh',
+                email: 'harshduplicate@example.com',
                 password: 'password123'
             });
         
         const response = await request(app)
             .post('/api/auth/register')
             .send({
-                name: 'Jane Smith',
-                email: 'duplicate@example.com',
+                name: 'Harsh',
+                email: 'harshduplicate@example.com',
                 password: 'password123'
             });
         
