@@ -1,12 +1,17 @@
 // config/database.js
 const { Sequelize } = require('sequelize');
+const dns = require('dns');
 require('dotenv').config();
+
+// Force IPv4
+dns.setDefaultResultOrder('ipv4first');
 
 let sequelize;
 
-// Check if we have Supabase URL (production)
 if (process.env.SUPABASE_DATABASE_URL) {
   console.log('🔗 Connecting to Supabase Cloud...');
+  
+  const url = new URL(process.env.SUPABASE_DATABASE_URL);
   
   sequelize = new Sequelize(process.env.SUPABASE_DATABASE_URL, {
     dialect: 'postgres',
@@ -14,12 +19,19 @@ if (process.env.SUPABASE_DATABASE_URL) {
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false // Required for Supabase
-      }
+        rejectUnauthorized: false
+      },
+      // Force IPv4
+      host: url.hostname,
+      port: parseInt(url.port) || 5432,
+      connectTimeout: 30000
     },
-    logging: false, // Set to console.log for debugging
+    // Explicit connection settings
+    host: url.hostname,
+    port: parseInt(url.port) || 5432,
+    logging: false,
     pool: {
-      max: 10,
+      max: 5,
       min: 0,
       acquire: 30000,
       idle: 10000
@@ -29,13 +41,21 @@ if (process.env.SUPABASE_DATABASE_URL) {
       underscored: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at'
+    },
+    // Retry on failure
+    retry: {
+      max: 3,
+      match: [
+        /SequelizeConnectionError/,
+        /SequelizeConnectionRefusedError/,
+        /ETIMEDOUT/,
+        /ENETUNREACH/
+      ]
     }
   });
-} 
-// Local development
-else {
+} else {
+  // Local development
   console.log('💻 Connecting to Local PostgreSQL...');
-  
   sequelize = new Sequelize(
     process.env.DB_DATABASE || 'finance_tracker',
     process.env.DB_USER || 'postgres',
@@ -61,26 +81,26 @@ else {
   );
 }
 
-const testConnection = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('✅ Database connection established successfully.');
-    
-    // Get database info
-    const [result] = await sequelize.query('SELECT current_database(), version()');
-    console.log(`📊 Database: ${result[0].current_database}`);
-    console.log(`🔢 PostgreSQL: ${result[0].version.split(',')[0]}`);
-    
-    return true;
-  } catch (error) {
-    console.error('❌ Unable to connect to database:', error.message);
-    console.error('📝 Connection details:', {
-      hasUrl: !!process.env.SUPABASE_DATABASE_URL,
-      env: process.env.NODE_ENV || 'development',
-      host: process.env.SUPABASE_DB_HOST || 'localhost'
-    });
-    return false;
+const testConnection = async (retries = 3) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await sequelize.authenticate();
+      console.log('✅ Database connection established successfully.');
+      
+      // Get database info
+      const [result] = await sequelize.query('SELECT version()');
+      console.log('📊 PostgreSQL version:', result[0].version.split(',')[0]);
+      
+      return true;
+    } catch (error) {
+      console.error(`❌ Connection attempt ${i + 1} failed:`, error.message);
+      if (i < retries - 1) {
+        console.log(`⏳ Retrying in ${(i + 1) * 2} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, (i + 1) * 2000));
+      }
+    }
   }
+  return false;
 };
 
 module.exports = {
