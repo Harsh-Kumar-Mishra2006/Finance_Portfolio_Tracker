@@ -6,7 +6,7 @@ const { ValidationError } = require('../utils/errorHandler');
 const authService = {
     // Registering user
     async register(userData) {
-        const { name, email, password } = userData;
+        const { name, email, password,phone_number } = userData;
         
         // Checking if user exists
         const existingUser = await User.findByEmail(email);
@@ -15,7 +15,7 @@ const authService = {
         }
         
         // Creating user
-        const user = await User.createUser({ name, email, password });
+        const user = await User.createUser({ name, email, password,phone_number });
         const userJSON = User.toJSON(user);
         
         // Generating token

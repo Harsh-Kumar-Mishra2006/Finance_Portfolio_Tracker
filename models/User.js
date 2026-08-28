@@ -27,6 +27,14 @@ const User = sequelize.define('User', {
             notEmpty: true
         }
     },
+    phone_number: {
+        type: DataTypes.BIGINT,
+        allowNull: false,
+        unique: true,
+        validate: {
+            notEmpty: true
+        }
+    },
     password_hash: {
         type: DataTypes.STRING(255),
         allowNull: false,
