@@ -4,7 +4,22 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const dns = require('dns');
+const net = require('net');
+
+// Force IPv4
 dns.setDefaultResultOrder('ipv4first');
+
+// Also override net.connect to force IPv4
+const originalConnect = net.connect;
+net.connect = function(...args) {
+  // If hostname is supabase.co, force IPv4
+  if (args[0] && typeof args[0] === 'object' && args[0].host && args[0].host.includes('supabase.co')) {
+    args[0].family = 4;
+  }
+  return originalConnect.apply(this, args);
+};
+
+
 require('dotenv').config();
 
 const { sequelize, testConnection } = require('./config/database');
